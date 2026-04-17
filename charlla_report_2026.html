@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>찰나 유입 · 회원가입 리포트</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  html { font-size: 110%; }
+  body { font-family: 'Pretendard', -apple-system, sans-serif; background-color: #f8fafc; }
+  .card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.07), 0 1px 2px -1px rgb(0 0 0 / 0.07); }
+</style>
+</head>
+<body class="p-4 md:p-10">
+<div class="max-w-6xl mx-auto">
+
+  <!-- HEADER -->
+  <header class="mb-10">
+    <div class="flex items-start justify-between flex-wrap gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-800">찰나 유입 · 회원가입 리포트</h1>
+        <p class="text-sm text-gray-400 mt-2">4/1 ~ 4/15 기준</p>
+      </div>
+      <div class="flex gap-2 items-center mt-1 flex-wrap">
+        <span class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1.5">
+          <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>GA4 기준
+        </span>
+        <span class="flex items-center gap-1.5 text-xs font-semibold text-gray-500 bg-white border border-gray-200 rounded-full px-3 py-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>Metabase 기준
+        </span>
+        <label class="flex items-center gap-1.5 text-xs font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-full px-4 py-1.5 cursor-pointer transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0l-3 3m3-3l3 3"/></svg>
+          유입 트래픽 업로드
+          <input type="file" id="uploadVisitors" accept=".csv" class="hidden">
+        </label>
+        <label class="flex items-center gap-1.5 text-xs font-semibold text-white bg-violet-500 hover:bg-violet-600 rounded-full px-4 py-1.5 cursor-pointer transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a2 2 0 002 2h12a2 2 0 002-2v-1M12 12V4m0 0l-3 3m3-3l3 3"/></svg>
+          이벤트 트래픽 업로드
+          <input type="file" id="uploadEvents" accept=".csv" class="hidden">
+        </label>
+        <span id="uploadStatus" class="text-xs text-gray-400"></span>
+      </div>
+    </div>
+  </header>
+
+  <!-- KPI CARDS -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8">
+    <div class="card p-6 border-2 border-blue-400">
+      <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-2">총 유입</p>
+      <h2 class="text-2xl font-bold text-gray-800">3,063명</h2>
+    </div>
+    <div class="card p-6 border-2 border-indigo-400">
+      <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">회원가입</p>
+      <div class="flex items-center gap-6">
+        <div>
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+            <span class="text-xs text-gray-400 font-semibold">GA4</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-800">110명</span>
+        </div>
+        <div class="w-px self-stretch bg-gray-100"></div>
+        <div>
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            <span class="text-xs text-gray-400 font-semibold">Metabase</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-800">160명</span>
+        </div>
+      </div>
+    </div>
+    <div class="card p-6 border-2 border-amber-400">
+      <p class="text-xs text-gray-400 font-semibold uppercase tracking-wide mb-3">전환율</p>
+      <div class="flex items-center gap-6">
+        <div>
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span>
+            <span class="text-xs text-gray-400 font-semibold">GA4</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-800">3.59%</span>
+        </div>
+        <div class="w-px self-stretch bg-gray-100"></div>
+        <div>
+          <div class="flex items-center gap-1.5 mb-1">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span>
+            <span class="text-xs text-gray-400 font-semibold">Metabase</span>
+          </div>
+          <span class="text-2xl font-bold text-gray-800">5.2%</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상단 2열: 왼쪽(주차별+퍼널), 오른쪽(월별+전환율) -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+
+    <!-- 왼쪽: 주차별 + 퍼널 -->
+    <div class="flex flex-col gap-6">
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-gray-700 mb-1">주차별 유입 및 가입 추이</h3>
+        <p class="text-sm text-gray-400 mb-5">4월 기준</p>
+        <canvas id="weeklyAprilChart" height="200"></canvas>
+      </div>
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-gray-700 mb-1">전환 퍼널</h3>
+        <p class="text-sm text-gray-400 mb-5">4월 기준</p>
+        <canvas id="funnelChart" height="160"></canvas>
+        <div class="mt-5 grid grid-cols-4 gap-2">
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <p class="text-sm text-gray-400 mb-1">유입→무료체험</p>
+            <p class="text-sm font-bold text-red-400">69.7% <span class="font-normal text-xs text-gray-400">이탈</span></p>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <p class="text-sm text-gray-400 mb-1">무료체험→계정</p>
+            <p class="text-sm font-bold text-amber-400">49.0% <span class="font-normal text-xs text-gray-400">이탈</span></p>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <p class="text-sm text-gray-400 mb-1">계정→가입정책</p>
+            <p class="text-sm font-bold text-emerald-400">17.8% <span class="font-normal text-xs text-gray-400">이탈</span></p>
+          </div>
+          <div class="bg-gray-50 rounded-lg p-3 text-center">
+            <p class="text-sm text-gray-400 mb-1">정책→회원가입</p>
+            <p class="text-sm font-bold text-red-400">71.7% <span class="font-normal text-xs text-gray-400">이탈</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 오른쪽: 월별 + 전환율 각각 카드 분리 -->
+    <div class="flex flex-col gap-6">
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-gray-700 mb-1">월별 유입 및 가입 추이</h3>
+        <p class="text-sm text-gray-400 mb-5">1월 — 4월(~15) · GA4 vs Metabase</p>
+        <canvas id="monthlyTopChart" height="200"></canvas>
+      </div>
+      <div class="card p-6">
+        <h3 class="text-base font-bold text-gray-700 mb-1">월별 회원가입 전환율 추이</h3>
+        <p class="text-sm text-gray-400 mb-5">GA4 vs Metabase 기준</p>
+        <canvas id="cvrTrendTopChart" height="200"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- 채널별 비중 + 전환율 -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+    <div class="card p-6">
+      <h3 class="text-base font-bold text-gray-700 mb-1">채널별 회원가입 비중</h3>
+      <p class="text-sm text-gray-400 mb-2">4월 기준</p>
+      <canvas id="channelChart" height="200"></canvas>
+    </div>
+    <div class="card p-6">
+      <h3 class="text-base font-bold text-gray-700 mb-1">채널별 회원가입 전환율</h3>
+      <p class="text-sm text-gray-400 mb-5">4월 기준</p>
+      <canvas id="cvrChart" height="200"></canvas>
+    </div>
+  </div>
+
+  <!-- 3개월 채널 비중 추이 -->
+  <div class="card p-6 mb-6">
+    <h3 class="text-base font-bold text-gray-700 mb-1">채널별 회원가입 비중 추이</h3>
+    <p class="text-sm text-gray-400 mb-5">1월 · 2월 · 3월 · 4월(~15)</p>
+    <canvas id="channelTrendChart" height="100"></canvas>
+  </div>
+
+  <!-- 유료 광고 매체별 효율 -->
+  <div class="card p-6 mb-6">
+    <h3 class="text-base font-bold text-gray-700 mb-1">유료 광고 매체별 효율</h3>
+    <p class="text-sm text-gray-400 mb-5">4월 기준 · Google 검색 / Naver 검색 / GDN / 카페24 배너</p>
+
+    <!-- KPI 4칸 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div class="border border-gray-100 rounded-xl p-4 border-t-4 border-t-blue-500">
+        <p class="text-xs text-gray-400 font-semibold mb-3">Google 검색광고</p>
+        <div class="grid grid-cols-3 gap-1 text-center mb-3">
+          <div><p class="text-sm text-gray-400 mb-0.5">유입</p><p class="text-sm font-bold text-gray-800">1,034</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">가입</p><p class="text-sm font-bold text-gray-800">25</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">회원가입율</p><p class="text-sm font-bold text-blue-500">2.42%</p></div>
+        </div>
+        <div class="border-t border-gray-100 pt-3 grid grid-cols-2 gap-1 text-center">
+          <div><p class="text-sm text-gray-400 mb-0.5">광고비</p><p class="text-sm font-bold text-gray-700">250만</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">CPA</p><p class="text-sm font-bold text-blue-500">10만</p></div>
+        </div>
+      </div>
+      <div class="border border-gray-100 rounded-xl p-4 border-t-4 border-t-emerald-500">
+        <p class="text-xs text-gray-400 font-semibold mb-3">Naver 검색광고</p>
+        <div class="grid grid-cols-3 gap-1 text-center mb-3">
+          <div><p class="text-sm text-gray-400 mb-0.5">유입</p><p class="text-sm font-bold text-gray-800">188</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">가입</p><p class="text-sm font-bold text-gray-800">6</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">회원가입율</p><p class="text-sm font-bold text-emerald-500">3.19%</p></div>
+        </div>
+        <div class="border-t border-gray-100 pt-3 grid grid-cols-2 gap-1 text-center">
+          <div><p class="text-sm text-gray-400 mb-0.5">광고비</p><p class="text-sm font-bold text-gray-700">150만</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">CPA</p><p class="text-sm font-bold text-emerald-500">25만</p></div>
+        </div>
+      </div>
+      <div class="border border-gray-100 rounded-xl p-4 border-t-4 border-t-violet-500">
+        <p class="text-xs text-gray-400 font-semibold mb-3">GDN 광고</p>
+        <div class="grid grid-cols-3 gap-1 text-center mb-3">
+          <div><p class="text-sm text-gray-400 mb-0.5">유입</p><p class="text-sm font-bold text-gray-800">786</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">가입</p><p class="text-sm font-bold text-gray-800">20</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">회원가입율</p><p class="text-sm font-bold text-violet-500">2.54%</p></div>
+        </div>
+        <div class="border-t border-gray-100 pt-3 grid grid-cols-2 gap-1 text-center">
+          <div><p class="text-sm text-gray-400 mb-0.5">광고비</p><p class="text-sm font-bold text-gray-700">100만</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">CPA</p><p class="text-sm font-bold text-violet-500">5만</p></div>
+        </div>
+      </div>
+      <div class="border border-gray-100 rounded-xl p-4 border-t-4 border-t-amber-500">
+        <p class="text-xs text-gray-400 font-semibold mb-3">카페24 배너광고</p>
+        <div class="grid grid-cols-3 gap-1 text-center mb-3">
+          <div><p class="text-sm text-gray-400 mb-0.5">유입</p><p class="text-sm font-bold text-gray-800">217</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">가입</p><p class="text-sm font-bold text-gray-800">17</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">회원가입율</p><p class="text-sm font-bold text-amber-500">7.83%</p></div>
+        </div>
+        <div class="border-t border-gray-100 pt-3 grid grid-cols-2 gap-1 text-center">
+          <div><p class="text-sm text-gray-400 mb-0.5">광고비</p><p class="text-sm font-bold text-gray-700">369만</p></div>
+          <div><p class="text-sm text-gray-400 mb-0.5">CPA</p><p class="text-sm font-bold text-amber-500">21.7만</p></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 비용 효율 차트 2종 -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div>
+        <p class="text-xs font-semibold text-gray-500 mb-3">CPA (가입 1명당 비용)</p>
+        <canvas id="adCpaChart" height="180"></canvas>
+      </div>
+      <div>
+        <p class="text-xs font-semibold text-gray-500 mb-3">회원가입율 vs CPA 효율</p>
+        <canvas id="adEffChart" height="180"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="card p-8 mb-8">
+    <h3 class="text-lg font-bold text-gray-800 mb-6">주요 인사이트</h3>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div>
+        <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-xs font-bold">검색/배너광고 독주</span>
+        <p class="text-base text-gray-600 mt-3 leading-relaxed">Paid Search 유입 <b>1,181명 (38.6%)</b>으로 단일 채널 최대. 무료체험 클릭의 85.9%를 견인하는 핵심 획득 채널.</p>
+      </div>
+      <div>
+        <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">가입 병목 구간</span>
+        <p class="text-base text-gray-600 mt-3 leading-relaxed">가입정책 동의(389명) → 회원가입(110명) 이탈 <b>71.7%</b>. 이 구간이 최대 병목으로 UX 개선이 필요합니다.</p>
+      </div>
+      <div>
+        <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">카페24 고효율</span>
+        <p class="text-base text-gray-600 mt-3 leading-relaxed">카페24 전환율 <b>7.9%</b>로 최상위. 유입 볼륨은 작지만 실제 전환 효율이 가장 높은 채널.</p>
+      </div>
+      <div>
+        <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-xs font-bold">데이터 편차</span>
+        <p class="text-base text-gray-600 mt-3 leading-relaxed">GA4(110명) vs Metabase(160명) <b>50명 차이</b>. 실제 DB에 가까운 Metabase 기준으로 성과 판단을 권장합니다.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- RAW TABLE 누적 -->
+  <div class="card p-6 overflow-x-auto mb-6">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-base font-bold text-gray-700">Raw Data — 소스별 전체 (GA4) <span class="text-xs font-normal text-gray-400 ml-1">누적</span></h3>
+    </div>
+    <p class="text-sm text-gray-400 mb-5" id="accPeriodLabel">4/1~4/15 누적</p>
+    <table class="w-full text-base text-left">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide pr-4">구분 / 소스</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">유입</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">무료체험</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">계정생성</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">가입정책</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">회원가입</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right pl-3">전환율</th>
+        </tr>
+      </thead>
+      <tbody id="rawTableBody"></tbody>
+      <tfoot>
+        <tr class="border-t-2 border-gray-200 bg-gray-50">
+          <td class="py-3 pr-4 font-bold text-gray-800">합계</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="accTotalV">3,063</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="accTotalFt">928</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="accTotalAc">473</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="accTotalPo">389</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="accTotalSu">110</td>
+          <td class="py-3 pl-3 text-right"><span id="accTotalCvr" class="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">3.6%</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- RAW TABLE 금주 -->
+  <div class="card p-6 overflow-x-auto mb-8" id="weeklyRawCard" style="display:none;">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-base font-bold text-gray-700">Raw Data — 금주 데이터 <span class="text-xs font-normal text-gray-400 ml-1">주간</span></h3>
+    </div>
+    <p class="text-sm text-gray-400 mb-5" id="weeklyPeriodLabel">업로드된 주간 데이터</p>
+    <table class="w-full text-base text-left">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide pr-4">구분 / 소스</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">유입</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">무료체험</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">계정생성</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">가입정책</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right px-3">회원가입</th>
+          <th class="pb-3 text-sm text-gray-400 font-semibold uppercase tracking-wide text-right pl-3">전환율</th>
+        </tr>
+      </thead>
+      <tbody id="weeklyTableBody"></tbody>
+      <tfoot>
+        <tr class="border-t-2 border-gray-200 bg-gray-50">
+          <td class="py-3 pr-4 font-bold text-gray-800">합계</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="wkTotalV">-</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="wkTotalFt">-</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="wkTotalAc">-</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="wkTotalPo">-</td>
+          <td class="py-3 px-3 text-right font-bold text-gray-800" id="wkTotalSu">-</td>
+          <td class="py-3 pl-3 text-right"><span id="wkTotalCvr" class="bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-0.5 rounded-full">-</span></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+</div>
+<script>
+const COLOR_GA = '#7c3aed';
+const COLOR_MB = '#10b981';
+
+// RAW TABLE
+const rawData = [
+  { cat: 'direct', rows: [
+    { name: 'direct', v:628, ft:35, ac:104, po:64, su:26, cvr:'4.1%', cvrType:'mid' },
+  ]},
+  { cat: 'unassigned', rows: [
+    { name: 'blog',        v:26,  ft:5,  ac:2,  po:2,  su:2,  cvr:'7.7%', cvrType:'high' },
+    { name: 'outstanding', v:0,   ft:0,  ac:0,  po:0,  su:0,  cvr:'-',    cvrType:'null' },
+    { name: 'qletter',     v:0,   ft:0,  ac:0,  po:0,  su:0,  cvr:'-',    cvrType:'null' },
+    { name: 'iboss',       v:2,   ft:0,  ac:0,  po:0,  su:0,  cvr:'0%',   cvrType:'null' },
+    { name: 'openads',     v:0,   ft:0,  ac:0,  po:0,  su:0,  cvr:'-',    cvrType:'null' },
+    { name: 'stibee',      v:11,  ft:1,  ac:0,  po:0,  su:0,  cvr:'0%',   cvrType:'null' },
+    { name: 'not set',     v:2,   ft:0,  ac:0,  po:0,  su:0,  cvr:'0%',   cvrType:'null' },
+  ]},
+  { cat: 'paid search', rows: [
+    { name: 'brand_Search', v:36,  ft:7,   ac:9,   po:7,   su:4,  cvr:'11.1%', cvrType:'high' },
+    { name: 'google',       v:1034, ft:755, ac:267, po:242, su:25, cvr:'2.4%',  cvrType:'mid' },
+    { name: 'naver',        v:152, ft:34,  ac:14,  po:13,  su:2,  cvr:'1.3%',  cvrType:'low' },
+    { name: 'instagram',    v:6,   ft:1,   ac:0,   po:0,   su:0,  cvr:'0%',    cvrType:'null' },
+  ]},
+  { cat: 'organic search', rows: [
+    { name: 'google',     v:147, ft:24, ac:11, po:8, su:4, cvr:'2.7%',  cvrType:'mid' },
+    { name: 'naver',      v:19,  ft:3,  ac:2,  po:2, su:1, cvr:'5.3%',  cvrType:'mid' },
+    { name: 'etc.(bing)', v:8,   ft:3,  ac:2,  po:2, su:1, cvr:'12.5%', cvrType:'high' },
+  ]},
+  { cat: 'referral', rows: [
+    { name: 'catenoid.net / charlla.io', v:11,  ft:0, ac:1,  po:1,  su:0,  cvr:'0%',  cvrType:'null' },
+    { name: 'cafe24 (ad)',               v:202, ft:6, ac:36, po:24, su:16, cvr:'7.9%', cvrType:'high' },
+    { name: 'makeshop',                  v:0,   ft:0, ac:0,  po:0,  su:0,  cvr:'-',   cvrType:'null' },
+    { name: 'ai',                        v:2,   ft:0, ac:0,  po:0,  su:0,  cvr:'0%',  cvrType:'null' },
+    { name: 'etc.',                      v:23,  ft:3, ac:5,  po:5,  su:1,  cvr:'4.3%',cvrType:'mid' },
+  ]},
+  { cat: 'display', rows: [
+    { name: 'GDN banner',        v:786, ft:50, ac:19, po:19, su:20, cvr:'2.5%', cvrType:'mid' },
+    { name: 'CAFE24 banner',     v:15,  ft:0,  ac:0,  po:0,  su:1, cvr:'6.7%', cvrType:'high' },
+    { name: 'IBOSS banner',      v:0,   ft:0,  ac:0,  po:0,  su:0, cvr:'-',    cvrType:'null' },
+    { name: 'Outstanding banner',v:0,   ft:0,  ac:0,  po:0,  su:0, cvr:'-',    cvrType:'null' },
+    { name: 'etc.(GFA, DMP..)',  v:16,  ft:1,  ac:1,  po:0,  su:0, cvr:'0%',   cvrType:'null' },
+  ]},
+  { cat: 'SNS', rows: [
+    { name: 'facebook / linkedin', v:12, ft:0, ac:0, po:0, su:0, cvr:'0%', cvrType:'null' },
+  ]},
+];
+const cvrColors = { high:'bg-emerald-100 text-emerald-700', mid:'bg-blue-100 text-blue-700', low:'bg-red-100 text-red-700', null:'bg-gray-100 text-gray-400' };
+const tbody = document.getElementById('rawTableBody');
+rawData.forEach(({ cat, rows }) => {
+  tbody.innerHTML += `<tr class="bg-gray-50 border-t border-gray-100"><td colspan="7" class="py-2 pr-4 text-xs font-bold text-gray-400 uppercase tracking-widest pl-4">${cat}</td></tr>`;
+  rows.forEach(r => {
+    const z = v => v === 0 ? `<span class="text-gray-300">${v}</span>` : v.toLocaleString();
+    tbody.innerHTML += `<tr class="border-t border-gray-50 hover:bg-gray-50 transition-colors">
+      <td class="py-2.5 pr-4 text-gray-700 pl-8">${r.name}</td>
+      <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.v)}</td>
+      <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.ft)}</td>
+      <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.ac)}</td>
+      <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.po)}</td>
+      <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.su)}</td>
+      <td class="py-2.5 pl-3 text-right"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${cvrColors[r.cvrType]}">${r.cvr}</span></td>
+    </tr>`;
+  });
+});
+
+// 주차별 4월
+new Chart(document.getElementById('weeklyAprilChart'), {
+  data: {
+    labels: ['4월 1주차 (4/1~4/8)', '4월 2주차 (4/9~4/15)'],
+    datasets: [
+      { type:'bar',  label:'방문자',     data:[1710,1532], backgroundColor:'rgba(59,130,246,0.15)', borderColor:'#3b82f6', borderWidth:2, borderRadius:6, borderSkipped:false, yAxisID:'y', order:3 },
+      { type:'line', label:'Metabase 회원가입',     data:[79,75],  borderColor:COLOR_MB, backgroundColor:'rgba(16,185,129,0.06)', borderWidth:2.5, pointBackgroundColor:COLOR_MB, pointRadius:6, borderDash:[4,3], tension:0, yAxisID:'y2', order:1 },
+      { type:'line', label:'GA4 회원가입',    data:[61,49],  borderColor:COLOR_GA, backgroundColor:'rgba(124,58,237,0.08)', borderWidth:2.5, pointBackgroundColor:COLOR_GA, pointRadius:6, tension:0, yAxisID:'y2', order:2 }
+    ]
+  },
+  options: {
+    responsive:true, interaction:{mode:'index',intersect:false},
+    layout:{ padding:{ top:30 } },
+    plugins:{
+      legend:{position:'bottom',labels:{color:'#111827',font:{size:14,family:'Pretendard'},boxWidth:8,boxHeight:8,padding:14}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString()}명`}}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#111827',font:{size:14,family:'Pretendard'}}},
+      y:{position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#111827',font:{size:13},callback:v=>v.toLocaleString()},title:{display:true,text:'방문자',color:'#111827',font:{size:13}}},
+      y2:{position:'right',grid:{display:false},ticks:{color:'#111827',font:{size:13}},title:{display:true,text:'가입',color:'#111827',font:{size:13}},min:0}
+    }
+  },
+  plugins:[{
+    id:'weeklyLabels',
+    afterDatasetDraw(chart, args) {
+      if (args.index !== 1 && args.index !== 2) return;
+      const {ctx} = chart;
+      const ds = chart.data.datasets[args.index];
+      // index 1 = MB(초록) → 선 위, index 2 = GA4(보라) → 선 아래
+      const isMB = args.index === 1;
+      const color = isMB ? COLOR_MB : COLOR_GA;
+      chart.getDatasetMeta(args.index).data.forEach((pt, i) => {
+        const val = ds.data[i];
+        if (val == null) return;
+        ctx.save();
+        ctx.font = 'bold 11px Pretendard, sans-serif';
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        if (isMB) {
+          ctx.textBaseline = 'bottom';
+          ctx.fillText(val + '명', pt.x, pt.y - 14);
+        } else {
+          ctx.textBaseline = 'top';
+          ctx.fillText(val + '명', pt.x, pt.y + 14);
+        }
+        ctx.restore();
+      });
+    }
+  }]
+});
+
+// 월별 유입+가입
+new Chart(document.getElementById('monthlyTopChart'), {
+  data: {
+    labels: ['1월','2월','3월','4월(~15)'],
+    datasets: [
+      { type:'bar',  label:'방문자',  data:[5046,4687,4532,3063], backgroundColor:'rgba(59,130,246,0.12)', borderColor:'#3b82f6', borderWidth:2, borderRadius:6, borderSkipped:false, yAxisID:'y', order:3 },
+      { type:'line', label:'Metabase 회원가입',  data:[326,245,198,160], borderColor:COLOR_MB, backgroundColor:'rgba(16,185,129,0.06)', borderWidth:2.5, pointBackgroundColor:COLOR_MB, pointRadius:5, borderDash:[4,3], tension:0.3, yAxisID:'y2', order:1 },
+      { type:'line', label:'GA4 회원가입', data:[317,222,153,110], borderColor:COLOR_GA, backgroundColor:'rgba(124,58,237,0.08)', borderWidth:2.5, pointBackgroundColor:COLOR_GA, pointRadius:5, tension:0.3, yAxisID:'y2', order:2 },
+      { type:'line', label:'목표 가입 (180명)', data:[180,180,180,180], borderColor:'#f97316', backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, tension:0, yAxisID:'y2', order:0 }
+    ]
+  },
+  options: {
+    responsive:true, interaction:{mode:'index',intersect:false},
+    plugins:{
+      legend:{position:'bottom',labels:{color:'#111827',font:{size:14,family:'Pretendard'},boxWidth:8,boxHeight:8,padding:14}},
+      tooltip:{callbacks:{label:ctx=>ctx.dataset.label.includes('목표') ? ` ${ctx.dataset.label}` : ` ${ctx.dataset.label}: ${ctx.parsed.y?.toLocaleString()}명`}}
+    },
+    scales:{
+      x:{grid:{display:false},ticks:{color:'#111827',font:{size:14,family:'Pretendard'}}},
+      y:{position:'left',grid:{color:'#f1f5f9'},ticks:{color:'#111827',font:{size:13},callback:v=>v.toLocaleString()},title:{display:true,text:'방문자',color:'#111827',font:{size:13}}},
+      y2:{position:'right',grid:{display:false},ticks:{color:'#111827',font:{size:13}},title:{display:true,text:'가입',color:'#111827',font:{size:13}},min:0}
+    }
+  },
+  plugins:[{
+    id:'targetLabelMonthly',
+    afterDraw(chart) {
+      const {ctx, scales} = chart;
+      const y2 = scales.y2;
+      if (!y2) return;
+      const yPx = y2.getPixelForValue(180);
+      const xRight = chart.chartArea.right;
+      ctx.save();
+      ctx.font = 'bold 12px Pretendard, sans-serif';
+      ctx.fillStyle = '#f97316';
+      ctx.textAlign = 'right';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('목표 180명', xRight, yPx - 4);
+      ctx.restore();
+    }
+  }]
+});
+
+// 월별 전환율 - 꺾은선
+new Chart(document.getElementById('cvrTrendTopChart'), {
+  type: 'line',
+  data: {
+    labels: ['1월','2월','3월','4월(~15)'],
+    datasets: [
+      { label:'Metabase 전환율',  data:[6.46,5.23,4.37,5.22], borderColor:COLOR_MB, backgroundColor:'transparent', borderWidth:2.5, pointBackgroundColor:COLOR_MB, pointRadius:5, borderDash:[4,3], tension:0.3 },
+      { label:'GA4 전환율', data:[6.28,4.74,3.38,3.59], borderColor:COLOR_GA, backgroundColor:'transparent', borderWidth:2.5, pointBackgroundColor:COLOR_GA, pointRadius:5, tension:0.3 },
+      { label:'목표 전환율 (4%)', data:[4,4,4,4], borderColor:'#f97316', backgroundColor:'transparent', borderWidth:1.5, borderDash:[6,4], pointRadius:0, tension:0 }
+    ]
+  },
+  options: {
+    responsive: true, interaction: { mode: 'index', intersect: false },
+    layout: { padding: { top: 30 } },
+    plugins: {
+      legend: { position: 'bottom', labels: { color: '#111827', font: { size: 14, family: 'Pretendard' }, boxWidth: 10, boxHeight: 10, padding: 16 } },
+      tooltip: { callbacks: { label: ctx => ctx.dataset.label.includes('목표') ? ` ${ctx.dataset.label}` : ` ${ctx.dataset.label}: ${ctx.parsed.y}%` } }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#111827', font: { size: 14, family: 'Pretendard' } }, offset: true },
+      y: { grid: { color: '#f1f5f9' }, ticks: { color: '#111827', font: { size: 13 }, callback: v => v + '%' }, min: 0, max: 9 }
+    }
+  },
+  plugins: [
+    {
+      id: 'cvrLineLabels',
+      afterDatasetDraw(chart, args) {
+        if (args.index === 2) return; // 목표선 캡션 제외
+        const { ctx, data } = chart;
+        const ds = data.datasets[args.index];
+        const isMB = args.index === 0;
+        const color = isMB ? COLOR_MB : COLOR_GA;
+        chart.getDatasetMeta(args.index).data.forEach((pt, i) => {
+          const val = ds.data[i];
+          if (val == null) return;
+          ctx.save();
+          ctx.font = 'bold 14px Pretendard, sans-serif';
+          ctx.fillStyle = color;
+          ctx.textAlign = 'center';
+          if (isMB) {
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(val + '%', pt.x, pt.y - 14);
+          } else {
+            ctx.textBaseline = 'top';
+            ctx.fillText(val + '%', pt.x, pt.y + 14);
+          }
+          ctx.restore();
+        });
+      }
+    },
+    {
+      id: 'targetLabelCvr',
+      afterDraw(chart) {
+        const {ctx, scales, chartArea} = chart;
+        const y = scales.y;
+        if (!y) return;
+        const yPx = y.getPixelForValue(4);
+        ctx.save();
+        ctx.font = 'bold 12px Pretendard, sans-serif';
+        ctx.fillStyle = '#f97316';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'bottom';
+        ctx.fillText('목표 4%', chartArea.right, yPx - 4);
+        ctx.restore();
+      }
+    }
+  ]
+});
+
+// 전환 퍼널 - 이탈률은 다음 단계 막대 우측에 표기
+const funnelData = [3063, 928, 473, 389, 110];
+const funnelLabels = ['유입','무료체험','계정생성','가입정책 동의','회원가입'];
+// dropRates[i] = i번째 막대 우측에 표시할 이탈률 (유입→무료체험 이탈률은 무료체험 행에 표시)
+const dropRates = [null, 69.7, 49.0, 17.8, 71.7];
+new Chart(document.getElementById('funnelChart'), {
+  type:'bar',
+  data: {
+    labels: funnelLabels,
+    datasets: [{ label:'사용자 수', data:funnelData, backgroundColor:['#e2e8f0','#cbd5e1','#94a3b8','#64748b','#3b82f6'], borderRadius:6, borderSkipped:false }]
+  },
+  options: {
+    indexAxis:'y', responsive:true,
+    layout: { padding: { right: 110 } },
+    plugins:{
+      legend:{display:false},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.x.toLocaleString()}명`}}
+    },
+    scales:{
+      x:{grid:{color:'#f1f5f9'},ticks:{color:'#111827',font:{size:14}},max:3600},
+      y:{grid:{display:false},ticks:{color:'#111827',font:{size:14,family:'Pretendard'}}}
+    }
+  },
+  plugins:[{
+    id:'funnelDropLabels',
+    afterDatasetDraw(chart) {
+      const {ctx} = chart;
+      chart.getDatasetMeta(0).data.forEach((bar, i) => {
+        const val = funnelData[i];
+        const drop = dropRates[i];
+        const xEnd = bar.x;
+        const y = bar.y;
+        ctx.save();
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.font = '10px Pretendard, sans-serif';
+        ctx.fillStyle = '#374151';
+        const numText = val.toLocaleString() + '명';
+        if (drop !== null) {
+          ctx.fillText(numText, xEnd + 8, y);
+          const numWidth = ctx.measureText(numText).width;
+          const color = '#9ca3af';
+          ctx.font = '10px Pretendard, sans-serif';
+          ctx.fillStyle = color;
+          ctx.fillText(' (▼' + drop + '% 이탈)', xEnd + 8 + numWidth, y);
+        } else {
+          ctx.fillText(numText, xEnd + 8, y);
+        }
+        ctx.restore();
+      });
+    }
+  }]
+});
+
+// 채널 데이터
+const channels = [
+  { name:'검색/배너광고', su:58, v:1946, color:'#3b82f6' },
+  { name:'직접 유입',     su:26, v:628,  color:'#10b981' },
+  { name:'카페24',        su:17, v:217,  color:'#f59e0b' },
+  { name:'자연유입',      su:8,  v:231,  color:'#06b6d4' },
+  { name:'기타',          su:1,  v:50,   color:'#cbd5e1' },
+];
+const totalSU = 110;
+
+// 도넛
+new Chart(document.getElementById('channelChart'), {
+  type:'doughnut',
+  data: { labels:channels.map(c=>c.name), datasets:[{data:channels.map(c=>c.su), backgroundColor:channels.map(c=>c.color), borderWidth:0, hoverOffset:4}] },
+  options: {
+    cutout:'45%', responsive:true,
+    plugins:{
+      legend:{position:'right',labels:{color:'#4b5563',font:{size:14,family:'Pretendard'},boxWidth:8,boxHeight:8,padding:10}},
+      tooltip:{callbacks:{label:ctx=>` ${ctx.label}: ${ctx.parsed}명 (${(ctx.parsed/totalSU*100).toFixed(1)}%)`}},
+    }
+  },
+  plugins:[{
+    id:'doughnutPct',
+    afterDatasetDraw(chart) {
+      const {ctx,data} = chart;
+      const total = data.datasets[0].data.reduce((a,b)=>a+b,0);
+      chart.getDatasetMeta(0).data.forEach((arc,i) => {
+        const val = data.datasets[0].data[i];
+        const pct = (val/total*100).toFixed(1);
+        if (parseFloat(pct) < 3) return;
+        const {x,y} = arc.tooltipPosition();
+        ctx.save(); ctx.font='bold 14px Pretendard,sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(pct+'%',x,y); ctx.restore();
+      });
+    }
+  }]
+});
+
+// CVR 바
+const cvrSorted = [...channels].map(c=>({...c,cvr:+(c.su/c.v*100).toFixed(1)})).sort((a,b)=>b.cvr-a.cvr);
+new Chart(document.getElementById('cvrChart'), {
+  type:'bar',
+  data: { labels:cvrSorted.map(c=>c.name), datasets:[{label:'전환율', data:cvrSorted.map(c=>c.cvr), backgroundColor:cvrSorted.map(c=>c.color+'33'), borderColor:cvrSorted.map(c=>c.color), borderWidth:2, borderRadius:6, borderSkipped:false}] },
+  options: {
+    indexAxis:'y', responsive:true,
+    plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` 전환율: ${ctx.parsed.x}%`}} },
+    scales:{ x:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:14},callback:v=>v+'%'}}, y:{grid:{display:false},ticks:{color:'#4b5563',font:{size:14,family:'Pretendard'}}} }
+  },
+  plugins:[{
+    id:'barPct',
+    afterDatasetDraw(chart) {
+      const {ctx} = chart;
+      chart.getDatasetMeta(0).data.forEach((bar,i) => {
+        const val = cvrSorted[i].cvr; const x=bar.x; const y=bar.y; const w=bar.width;
+        ctx.save(); ctx.font='bold 14px Pretendard,sans-serif';
+        ctx.fillStyle = w>36 ? cvrSorted[i].color : '#9ca3af';
+        ctx.textAlign = w>36 ? 'right' : 'left'; ctx.textBaseline='middle';
+        ctx.fillText(val+'%', w>36 ? x-8 : x+6, y); ctx.restore();
+      });
+    }
+  }]
+});
+
+// 3개월 채널 비중
+new Chart(document.getElementById('channelTrendChart'), {
+  type:'bar',
+  data: {
+    labels: ['1월','2월','3월','4월(~15)'],
+    datasets: [
+      { label:'검색/배너광고', data:[47, 43, 44, 52.7], backgroundColor:'#3b82f6cc', borderColor:'#3b82f6', borderWidth:1.5, borderRadius:4, borderSkipped:false },
+      { label:'직접 유입',     data:[22, 25, 29, 23.6], backgroundColor:'#10b981cc', borderColor:'#10b981', borderWidth:1.5, borderRadius:4, borderSkipped:false },
+      { label:'카페24',        data:[19, 18, 17, 15.5], backgroundColor:'#f59e0bcc', borderColor:'#f59e0b', borderWidth:1.5, borderRadius:4, borderSkipped:false },
+      { label:'자연유입',      data:[9,  12, 7,  7.3],  backgroundColor:'#06b6d4cc', borderColor:'#06b6d4', borderWidth:1.5, borderRadius:4, borderSkipped:false },
+      { label:'기타',          data:[3,  2,  3,  0.9],  backgroundColor:'#cbd5e1cc', borderColor:'#cbd5e1', borderWidth:1.5, borderRadius:4, borderSkipped:false },
+    ]
+  },
+  options: {
+    responsive:true, interaction:{mode:'index',intersect:false},
+    plugins:{ legend:{position:'bottom',labels:{color:'#4b5563',font:{size:14,family:'Pretendard'},boxWidth:8,boxHeight:8,padding:16}}, tooltip:{callbacks:{label:ctx=>` ${ctx.dataset.label}: ${ctx.parsed.y}%`}} },
+    scales:{ x:{grid:{display:false},ticks:{color:'#4b5563',font:{size:15,family:'Pretendard'}}}, y:{grid:{color:'#f1f5f9'},ticks:{color:'#374151',font:{size:14},callback:v=>v+'%'},max:70} }
+  },
+  plugins:[{
+    id:'barPctLabel',
+    afterDatasetDraw(chart,args) {
+      const {ctx} = chart;
+      chart.getDatasetMeta(args.index).data.forEach((bar,i) => {
+        const val = chart.data.datasets[args.index].data[i];
+        if (val < 4) return;
+        ctx.save(); ctx.font='bold 13px Pretendard,sans-serif'; ctx.fillStyle='#fff'; ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText(val+'%', bar.x, bar.y+(bar.height/2)); ctx.restore();
+      });
+    }
+  }]
+});
+
+// ── 유료 광고 효율 차트
+const adEff = [
+  { name:'Google',  v:1034, su:25, cost:2500000, color:'#3b82f6' },
+  { name:'Naver',   v:188,  su:6,  cost:1500000, color:'#10b981' },
+  { name:'GDN',     v:786,  su:20, cost:1000000, color:'#7c3aed' },
+  { name:'카페24',  v:217,  su:17, cost:3690000, color:'#f59e0b' },
+];
+adEff.forEach(d => { d.cpa=Math.round(d.cost/d.su); d.cvr=+(d.su/d.v*100).toFixed(2); });
+const adLabels = adEff.map(d=>d.name);
+const adColors = adEff.map(d=>d.color);
+
+new Chart(document.getElementById('adCpaChart'), {
+  type:'bar',
+  data:{ labels:adLabels, datasets:[{ label:'CPA', data:adEff.map(d=>d.cpa), backgroundColor:adColors.map(c=>c+'33'), borderColor:adColors, borderWidth:2, borderRadius:6, borderSkipped:false }] },
+  options:{ responsive:true, plugins:{ legend:{display:false}, tooltip:{callbacks:{label:ctx=>` CPA: ${ctx.parsed.y.toLocaleString()}원`}} },
+    scales:{ x:{grid:{display:false},ticks:{color:'#111827',font:{size:14,family:'Pretendard'}}}, y:{grid:{color:'#f1f5f9'}, max:300000, ticks:{color:'#111827',font:{size:13},callback:v=>v>=10000?Math.round(v/10000)+'만원':v+'원'}} } },
+  plugins:[{ id:'cpaLbl', afterDatasetDraw(chart) {
+    const {ctx}=chart;
+    chart.getDatasetMeta(0).data.forEach((bar,i)=>{
+      const val=adEff[i].cpa;
+      ctx.save(); ctx.font='bold 13px Pretendard,sans-serif'; ctx.fillStyle=adEff[i].color; ctx.textAlign='center'; ctx.textBaseline='bottom';
+      ctx.fillText(val>=10000?(val/10000).toFixed(1)+'만원':val+'원', bar.x, bar.y-4); ctx.restore();
+    });
+  }}]
+});
+
+const maxCost=Math.max(...adEff.map(d=>d.cost));
+new Chart(document.getElementById('adEffChart'), {
+  type:'bubble',
+  data:{ datasets:adEff.map(d=>({ label:d.name, data:[{x:d.cvr, y:Math.round(d.cpa/10000), r:Math.max(8,d.cost/maxCost*28)}], backgroundColor:d.color+'88', borderColor:d.color, borderWidth:2 })) },
+  options:{ responsive:true,
+    plugins:{ legend:{position:'bottom',labels:{color:'#111827',font:{size:14,family:'Pretendard'},boxWidth:8,boxHeight:8,padding:10}},
+      tooltip:{callbacks:{label:ctx=>{ const d=adEff[ctx.datasetIndex]; return [`${d.name}`,`전환율 ${d.cvr}% / CPA ${Math.round(d.cpa/10000)}만원`,`광고비 ${d.cost/10000}만원`]; }}} },
+    scales:{
+      x:{title:{display:true,text:'전환율 (%)',color:'#6b7280',font:{size:13}}, ticks:{color:'#111827',font:{size:13},callback:v=>v+'%'}, grid:{color:'#f1f5f9'}, min:0, max:10},
+      y:{title:{display:true,text:'CPA (만원)',color:'#6b7280',font:{size:13}}, ticks:{color:'#111827',font:{size:13},callback:v=>v+'만'}, grid:{color:'#f1f5f9'}, min:0, max:35}
+    }
+  }
+});
+
+// ── 업로드 상태 관리
+const uploadState = { visitors: null, events: null };
+const status = document.getElementById('uploadStatus');
+
+// ── 매핑 규칙 (유입 트래픽)
+function mapVisitorRow(구분, 소스, 매체) {
+  const s = (소스 || '').trim().toLowerCase();
+  const m = (매체 || '').trim().toLowerCase();
+  const g = (구분 || '').trim().toLowerCase();
+
+  if (g === 'direct') return { cat: 'direct', row: 'direct' };
+  if (m === 'brand_search_pc' || m === 'brand_search_m') return { cat: 'paid search', row: 'brand_Search' };
+  if (g === 'paid search' && s === 'google' && m === 'cpc') return { cat: 'paid search', row: 'google' };
+  if ((g === 'paid search' || g === 'paid shopping') && s === 'naver') return { cat: 'paid search', row: 'naver' };
+  if (g === 'paid video' && s === 'google') return { cat: 'paid search', row: 'google' };
+  if (['ig','instagram','l.instagram.com'].includes(s)) return { cat: 'paid search', row: 'instagram' };
+  if (g === 'organic search' && s === 'google') return { cat: 'organic search', row: 'google' };
+  if (g === 'organic search' && (s.includes('naver') || s === 'm.naver.com' || s === 'm.search.naver.com')) return { cat: 'organic search', row: 'naver' };
+  if (g === 'organic search' && s === 'bing') return { cat: 'organic search', row: 'etc.(bing)' };
+  if (['inblog','blog','charlla_inblog','blog.naver.com','m.blog.naver.com','blog.catenoid.net'].includes(s)) return { cat: 'unassigned', row: 'blog' };
+  if (s === 'iboss') return { cat: 'unassigned', row: 'iboss' };
+  if (s === 'stibee') return { cat: 'unassigned', row: 'stibee' };
+  if (['charlla_hp'].includes(s)) return { cat: 'unassigned', row: 'not set' };
+  if (s === 'openads') return { cat: 'unassigned', row: 'openads' };
+  if (['catenoid.net','charlla.io'].includes(s)) return { cat: 'referral', row: 'catenoid.net / charlla.io' };
+  if (s === 'chatgpt.com' || (g === 'referral' && s === 'ai')) return { cat: 'referral', row: 'ai' };
+  if (g === 'referral' && s.includes('cafe24')) return { cat: 'referral', row: 'cafe24 (ad)' };
+  if (g === 'referral' && s === 'cafe24' && m === 'banner') return { cat: 'display', row: 'CAFE24 banner' };
+  if (s === 'gdn' || (g === 'display' && s === 'google' && m === 'cpc') || g === 'cross-network') return { cat: 'display', row: 'GDN banner' };
+  if (g === 'display' && s === 'cafe24') return { cat: 'display', row: 'CAFE24 banner' };
+  if (g === 'display') return { cat: 'display', row: 'etc. (GFA, DMP..)' };
+  if (g === 'organic social') return { cat: 'unassigned', row: 'blog' };
+  if (g === 'referral') return { cat: 'referral', row: 'etc.' };
+  if (g === 'unassigned') return { cat: 'unassigned', row: 'not set' };
+  return null; // 신규 소스 — 확인 필요
+}
+
+// ── 매핑 규칙 (이벤트 트래픽)
+const freetrialEvents = new Set(['ga4-btn-home-freetrial','ga4-btn-gnb-freetrial','ga4-btn-basic-free','ga4-btn-home-footer-freetrial','ga4-btn-lite-free','ga4-btn-multiplayer-free','ga4-btn-playersetting-footer-free','ga4-btn-playersetting-free','ga4-btn-playlist-footer-free','ga4-btn-playlist-free','ga4-btn-playlist-free1','ga4-btn-playlist-free2','ga4-btn-standard-free','ga4-btn-statistic-free','ga4_btn_basic_free','ga4-btn-statistic-footer-free']);
+const accountEvents = new Set(['sign_up_create_account','sign-up-create-account-social']);
+const policyEvents  = new Set(['ga4-btn-policy-next','ga4-btn-policy-social-next']);
+const signupEvents  = new Set(['sign_up']);
+const ignoreEvents  = new Set(['start_sign_up','ga4-btn-shopinfo-next']);
+
+function getEventStage(ev) {
+  if (ignoreEvents.has(ev)) return null;
+  if (freetrialEvents.has(ev)) return 'ft';
+  if (accountEvents.has(ev))   return 'ac';
+  if (policyEvents.has(ev))    return 'po';
+  if (signupEvents.has(ev))    return 'su';
+  return null;
+}
+
+// ── CSV 파싱 (EUC-KR 대응)
+function parseCSV(text) {
+  const lines = text.trim().split('\n');
+  const headers = lines[0].split(',').map(h => h.trim());
+  return lines.slice(1).map(line => {
+    const vals = line.split(',').map(v => v.trim());
+    const obj = {};
+    headers.forEach((h, i) => obj[h] = vals[i] || '');
+    return obj;
+  });
+}
+
+// ── 표 렌더링
+function renderTable(tbodyId, data, cvrColors) {
+  const tbody = document.getElementById(tbodyId);
+  tbody.innerHTML = '';
+  data.forEach(({ cat, rows }) => {
+    tbody.innerHTML += `<tr class="bg-gray-50 border-t border-gray-100"><td colspan="7" class="py-2 pr-4 text-xs font-bold text-gray-400 uppercase tracking-widest pl-4">${cat}</td></tr>`;
+    rows.forEach(r => {
+      const z = v => v === 0 ? `<span class="text-gray-300">${v}</span>` : v.toLocaleString();
+      const cvr = r.v > 0 ? (r.su / r.v * 100).toFixed(1) + '%' : '-';
+      const cvrType = r.v > 0 ? (r.su/r.v > 0.07 ? 'high' : r.su/r.v > 0.02 ? 'mid' : r.su/r.v > 0 ? 'low' : 'null') : 'null';
+      tbody.innerHTML += `<tr class="border-t border-gray-50 hover:bg-gray-50 transition-colors">
+        <td class="py-2.5 pr-4 text-gray-700 pl-8">${r.name}</td>
+        <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.v)}</td>
+        <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.ft)}</td>
+        <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.ac)}</td>
+        <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.po)}</td>
+        <td class="py-2.5 px-3 text-right text-gray-600 tabular-nums">${z(r.su)}</td>
+        <td class="py-2.5 pl-3 text-right"><span class="text-xs font-semibold px-2 py-0.5 rounded-full ${cvrColors[cvrType]}">${cvr}</span></td>
+      </tr>`;
+    });
+  });
+}
+
+// ── rawData 구조를 key맵으로 변환
+function buildKeyMap(rawData) {
+  const map = {};
+  rawData.forEach(({ cat, rows }) => {
+    rows.forEach(r => { map[cat + '|' + r.name] = r; });
+  });
+  return map;
+}
+
+// ── 두 파일 모두 올라오면 처리
+function processUploads() {
+  if (!uploadState.visitors || !uploadState.events) return;
+
+  const status = document.getElementById('uploadStatus');
+  const cvrColors = { high:'bg-emerald-100 text-emerald-700', mid:'bg-blue-100 text-blue-700', low:'bg-red-100 text-red-700', null:'bg-gray-100 text-gray-400' };
+
+  // 구조 키 목록
+  const structure = [
+    { cat:'direct',         rows:['direct'] },
+    { cat:'unassigned',     rows:['blog','outstanding','qletter','iboss','openads','stibee','not set'] },
+    { cat:'paid search',    rows:['brand_Search','google','naver','instagram'] },
+    { cat:'organic search', rows:['google','naver','etc.(bing)'] },
+    { cat:'referral',       rows:['catenoid.net / charlla.io','cafe24 (ad)','makeshop','ai','etc.'] },
+    { cat:'display',        rows:['GDN banner','CAFE24 banner','IBOSS banner','Outstanding banner','etc. (GFA, DMP..)'] },
+    { cat:'SNS',            rows:['facebook / linkedin'] },
+  ];
+
+  // 빈 주간 데이터 맵 생성
+  const weekMap = {};
+  structure.forEach(({ cat, rows }) => {
+    rows.forEach(name => { weekMap[cat+'|'+name] = { name, v:0, ft:0, ac:0, po:0, su:0 }; });
+  });
+
+  const unknownSources = [];
+
+  // 1. 유입 트래픽 파싱
+  uploadState.visitors.forEach(row => {
+    const 구분 = row['구분'] || row['Channel Group'] || '';
+    const 소스 = row['소스'] || row['Source'] || '';
+    const 매체 = row['매체'] || row['Medium'] || '';
+    const 사용자 = parseInt(row['사용자'] || row['Users'] || row['사용자수'] || '0') || 0;
+    const mapped = mapVisitorRow(구분, 소스, 매체);
+    if (!mapped) {
+      unknownSources.push({ 구분, 소스, 매체, 사용자 });
+      return;
+    }
+    const key = mapped.cat + '|' + mapped.row;
+    if (weekMap[key]) weekMap[key].v += 사용자;
+  });
+
+  // 2. 이벤트 트래픽 파싱
+  uploadState.events.forEach(row => {
+    const ev = (row['이벤트'] || row['Event'] || '').trim();
+    const 소스 = row['소스'] || row['Source'] || '';
+    const 매체 = row['매체'] || row['Medium'] || '';
+    const 사용자 = parseInt(row['사용자수'] || row['사용자'] || row['Users'] || '0') || 0;
+    const stage = getEventStage(ev);
+    if (!stage) return;
+    const mapped = mapVisitorRow('', 소스, 매체); // 이벤트는 구분 없이 소스/매체만
+    if (!mapped) return;
+    const key = mapped.cat + '|' + mapped.row;
+    if (weekMap[key]) weekMap[key][stage] += 사용자;
+  });
+
+  // 신규 소스 알림
+  if (unknownSources.length > 0) {
+    const msg = unknownSources.map(u => `${u.구분} / ${u.소스} (${u.사용자}명)`).join('\n');
+    alert(`⚠ 아래 소스가 기존 분류에 없습니다. 어디에 매핑할지 확인해주세요:\n\n${msg}`);
+  }
+
+  // 금주 표 데이터 구성
+  const weeklyData = structure.map(({ cat, rows }) => ({
+    cat,
+    rows: rows.map(name => weekMap[cat+'|'+name] || { name, v:0, ft:0, ac:0, po:0, su:0 })
+  }));
+
+  // 누적 표 업데이트 (기존 rawData에 더하기)
+  const accKeyMap = buildKeyMap(rawData);
+  structure.forEach(({ cat, rows }) => {
+    rows.forEach(name => {
+      const key = cat + '|' + name;
+      const wk = weekMap[key];
+      const acc = accKeyMap[key];
+      if (acc && wk) {
+        acc.v  += wk.v;
+        acc.ft += wk.ft;
+        acc.ac += wk.ac;
+        acc.po += wk.po;
+        acc.su += wk.su;
+      }
+    });
+  });
+
+  // 표 렌더링
+  renderTable('rawTableBody', rawData, cvrColors);
+  renderTable('weeklyTableBody', weeklyData, cvrColors);
+
+  // 합계 업데이트
+  const sumFields = ['v','ft','ac','po','su'];
+  const accTotals = sumFields.map(f => rawData.flatMap(d => d.rows).reduce((s,r) => s + (r[f]||0), 0));
+  const wkTotals  = sumFields.map(f => weeklyData.flatMap(d => d.rows).reduce((s,r) => s + (r[f]||0), 0));
+
+  ['accTotalV','accTotalFt','accTotalAc','accTotalPo','accTotalSu'].forEach((id,i) => {
+    document.getElementById(id).textContent = accTotals[i].toLocaleString();
+  });
+  document.getElementById('accTotalCvr').textContent = accTotals[0] > 0 ? (accTotals[4]/accTotals[0]*100).toFixed(1)+'%' : '-';
+
+  ['wkTotalV','wkTotalFt','wkTotalAc','wkTotalPo','wkTotalSu'].forEach((id,i) => {
+    document.getElementById(id).textContent = wkTotals[i].toLocaleString();
+  });
+  document.getElementById('wkTotalCvr').textContent = wkTotals[0] > 0 ? (wkTotals[4]/wkTotals[0]*100).toFixed(1)+'%' : '-';
+
+  // 금주 표 표시
+  document.getElementById('weeklyRawCard').style.display = 'block';
+
+  status.textContent = '✓ 업데이트 완료';
+  status.className = 'text-xs text-emerald-500 font-semibold';
+  setTimeout(() => { status.textContent = ''; status.className = 'text-xs text-gray-400'; }, 3000);
+
+  // 업로드 상태 초기화
+  uploadState.visitors = null;
+  uploadState.events = null;
+}
+
+// ── 유입 트래픽 업로드
+document.getElementById('uploadVisitors').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  status.textContent = '유입 파일 읽는 중...';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      uploadState.visitors = parseCSV(ev.target.result);
+      status.textContent = uploadState.events ? '처리 중...' : '✓ 유입 파일 로드 완료. 이벤트 파일을 올려주세요.';
+      status.className = 'text-xs text-blue-500 font-semibold';
+      processUploads();
+    } catch(err) { status.textContent = '⚠ 유입 파일 오류'; console.error(err); }
+  };
+  reader.readAsText(file, 'euc-kr');
+  e.target.value = '';
+});
+
+// ── 이벤트 트래픽 업로드
+document.getElementById('uploadEvents').addEventListener('change', function(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  status.textContent = '이벤트 파일 읽는 중...';
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      uploadState.events = parseCSV(ev.target.result);
+      status.textContent = uploadState.visitors ? '처리 중...' : '✓ 이벤트 파일 로드 완료. 유입 파일을 올려주세요.';
+      status.className = 'text-xs text-violet-500 font-semibold';
+      processUploads();
+    } catch(err) { status.textContent = '⚠ 이벤트 파일 오류'; console.error(err); }
+  };
+  reader.readAsText(file, 'euc-kr');
+  e.target.value = '';
+});
+
+
+</script>
+</body>
+</html>
